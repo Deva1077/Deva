@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>YouTube to MP3 Cutter - Convert & Download</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+    position: relative;
+    flex-direction: column;
+  }
+
+  /* Animated glowing circles in background */
+  .bg-circles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+  }
+
+  .bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    filter: blur(40px);
+    opacity: 0.3;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  /* Distinct circles with different sizes and animation */
+  .circle1 {
+    width: 250px;
+    height: 250px;
+    top: 10%;
+    left: 15%;
+    animation-name: moveCircle1;
+    animation-duration: 12s;
+  }
+
+  .circle2 {
+    width: 180px;
+    height: 180px;
+    bottom: 15%;
+    right: 20%;
+    animation-name: moveCircle2;
+    animation-duration: 16s;
+  }
+
+  .circle3 {
+    width: 120px;
+    height: 120px;
+    top: 70%;
+    left: 50%;
+    animation-name: moveCircle3;
+    animation-duration: 10s;
+  }
+
+  @keyframes moveCircle1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, 10px) scale(1.1); }
+  }
+
+  @keyframes moveCircle2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-25px, 20px) scale(1.05); }
+  }
+
+  @keyframes moveCircle3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(15px, -20px) scale(0.95); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    padding: 30px 40px;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    text-align: center;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+
+  label {
+    display: block;
+    margin-top: 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #ddd;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transition: background 0.3s ease;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+  }
+
+  input[type="text"]::placeholder,
+  input[type="number"]::placeholder {
+    color: #bbb;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 8px #fff;
+  }
+
+  .time-inputs {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .time-inputs > div {
+    flex: 1;
+  }
+
+  button {
+    margin-top: 25px;
+    background: #764ba2;
+    background-image: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 12px 0;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.6);
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    background-image: linear-gradient(45deg, #5a6cd8, #5d408d);
+    box-shadow: 0 8px 20px rgba(93, 64, 141, 0.8);
+  }
+
+  .output {
+    margin-top: 30px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 15px 20px;
+    font-size: 0.95rem;
+    word-break: break-word;
+  }
+
+  audio {
+    margin-top: 20px;
+    width: 100%;
+    border-radius: 12px;
+    outline: none;
+  }
+
+  small {
+    color: #ccc;
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+  }
+
+  .footer {
+    margin-top: 35px;
+    font-size: 0.85rem;
+    color: #bbb;
+    user-select: none;
+  }
+
+  /* New fixed bottom footer for "Created by DEVAxARC" */
+  .bottom-footer {
+    position: fixed;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Poppins', sans-serif;
+    user-select: none;
+    z-index: 10;
+    text-shadow: 0 0 6px rgba(0,0,0,0.3);
+  }
+</style>
+</head>
+<body>
+  <div class="bg-circles" aria-hidden="true">
+    <div class="bg-circle circle1"></div>
+    <div class="bg-circle circle2"></div>
+    <div class="bg-circle circle3"></div>
+  </div>
+
+  <main class="container" role="main">
+    <h1>YouTube to MP3 + Cutter</h1>
+    <label for="youtubeURL">YouTube Video URL</label>
+    <input type="text" id="youtubeURL" placeholder="https://www.youtube.com/watch?v=example" aria-label="YouTube Video URL" required />
+    
+    <div class="time-inputs" aria-label="Select start and end time to cut">
+      <div>
+        <label for="startTime">Start Time (seconds)</label>
+        <input type="number" id="startTime" min="0" value="0" aria-describedby="startHelp" />
+        <small id="startHelp">Where cut begins</small>
+      </div>
+      <div>
+        <label for="endTime">End Time (seconds)</label>
+        <input type="number" id="endTime" min="1" value="30" aria-describedby="endHelp" />
+        <small id="endHelp">Where cut ends</small>
+      </div>
+    </div>
+
+    <button id="convertBtn">Convert & Download MP3</button>
+
+    <div id="output" class="output" aria-live="polite" aria-atomic="true"></div>
+    <audio id="audioPlayer" controls hidden></audio>
+
+    <div class="footer"> 
+      &copy; 2024 YouTube to MP3 Cutter (Demo Only) - No real YouTube download is done here.
+    </div>
+  </main>
+
+  <div class="bottom-footer" aria-hidden="true">
+    Created by DEVAxARC
+  </div>
+
+<script>
+  const urlInput = document.getElementById('youtubeURL');
+  const startTimeInput = document.getElementById('startTime');
+  const endTimeInput = document.getElementById('endTime');
+  const convertBtn = document.getElementById('convertBtn');
+  const output = document.getElementById('output');
+  const audioPlayer = document.getElementById('audioPlayer');
+
+  function isValidYouTubeUrl(url) {
+    const pattern = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/;
+    return pattern.test(url);
+  }
+
+  // Format seconds to mm:ss
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+  }
+
+  convertBtn.addEventListener('click', () => {
+    output.innerHTML = '';
+    audioPlayer.hidden = true;
+    audioPlayer.src = '';
+
+    const url = urlInput.value.trim();
+    const start = Number(startTimeInput.value);
+    const end = Number(endTimeInput.value);
+
+    // Input validation
+    if (!url) {
+      output.textContent = 'Please enter a YouTube video URL.';
+      return;
+    }
+    if (!isValidYouTubeUrl(url)) {
+      output.textContent = 'Please enter a valid YouTube video URL.';
+      return;
+    }
+    if (isNaN(start) || isNaN(end) || start < 0 || end <= 0) {
+      output.textContent = 'Please enter valid start and end times.';
+      return;
+    }
+    if (start >= end) {
+      output.textContent = 'Start time must be less than end time.';
+      return;
+    }
+
+    output.innerHTML = 'Processing your request... <br> This is a demo: No actual video/audio is downloaded or converted here.';
+
+    // Simulate conversion delay
+    setTimeout(() => {
+      output.innerHTML = `
+        <strong>Conversion complete!</strong><br>
+        <p>You requested audio from <em>${formatTime(start)}</em> to <em>${formatTime(end)}</em> of your YouTube video.</p>
+        <p><a href="#" id="downloadLink" download="audio-cut-demo.mp3" style="color: #ffd700; text-decoration: underline;">Download Demo MP3</a></p>
+        <small>Note: This demo download contains a short sample MP3 unrelated to your input.</small>
+      `;
+
+      // Demo MP3 url - a short CC sample mp3 (from freesound, or any public small audio)
+      const demoMp3Url = 'https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_700KB.mp3';
+
+      // Setup audio player with demo mp3 and cut simulated by setting start/end time dynamically
+      audioPlayer.src = demoMp3Url;
+      audioPlayer.currentTime = start;
+      audioPlayer.hidden = false;
+
+      // Implement cut simulation: stop playback at specified end time
+      audioPlayer.ontimeupdate = () => {
+        if (audioPlayer.currentTime >= end) {
+          audioPlayer.pause();
+        }
+      };
+
+      // Setup download link to demo mp3 (full file)
+      const downloadLink = document.getElementById('downloadLink');
+      downloadLink.href = demoMp3Url;
+
+    }, 2000);
+  });
+</script>
+</body>
+</html>
+
